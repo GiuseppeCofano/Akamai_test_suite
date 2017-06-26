@@ -1,0 +1,24 @@
+#!/bin/bash
+
+WD=$(pwd)
+cd ~/Desktop/netshaper/netshaper_0.1 
+echo "breakpoint1"
+sudo -S ./netshaper config_akamai.json < file & 
+echo "breakpoint2"
+cd $WD
+sleep 4
+echo Netshaper started... $(ps aux | grep 'netshaper' | awk '{print $2}')
+sleep 50
+curl -k -H "Auth: quavlive123" https://localhost:8030/json/set/?rate=$1
+pwd
+./chrome_test.py &
+echo Chrome started... $(ps aux | grep 'chrome' | awk '{print $2}')
+sleep 70
+sudo -S tcpdump -i eth0 -n -s 0 -w akamai.dump < file &
+echo Tcpdump started... $(ps aux | grep 'tcpdump' | awk '{print $2}')
+sleep 150
+curl -k -H "Auth: quavlive123" https://localhost:8030/json/set/?rate=$2
+sleep 240
+sudo kill -9 $(ps aux | grep 'tcpdump' | awk '{print $2}')
+sudo kill -9 $(ps aux | grep 'chrome' | awk '{print $2}')
+sudo kill -9 $(ps aux | grep 'netshaper' | awk '{print $2}')
